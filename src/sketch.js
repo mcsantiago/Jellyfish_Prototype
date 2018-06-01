@@ -69,6 +69,18 @@ function sandDollar(x, y) {
 };
 
 /**
+ * Draws a Coral obstacle
+ * @param {x-position} x 
+ * @param {y-position} y 
+ */
+function coralBar(x, y, w, h) {
+    push();
+    fill(255, 0, 0);
+    rect(x, y, w, h);
+    pop();
+}
+
+/**
  * Draws a plankton
  * @param {x-position} x 
  * @param {y-position} y 
@@ -106,36 +118,54 @@ function plankton(x, y, r) {
 };
 
 var wave;
-var maxPlankton;
-var maxSandDollar;
-var xPlankton;
-var yPlankton;
-var xSandDollar;
-var ySandDollar;
-var jellyFishX;
-var jellyFishY;
 var isMousePressed;
 var planktonCount;
 var sandDollarCount;
 var health;
 
+var maxPlankton;
+var maxSandDollar;
+var maxCoral;
+
+var xPlankton;
+var yPlankton;
+var xSandDollar;
+var ySandDollar;
+var xCoral;
+var yCoral;
+var dyCoral;
+var wCoral;
+var hCoral;
+var jellyFishX;
+var jellyFishY;
+
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   frameRate(30);
 
-  wave = 0;
   maxPlankton = 5;
   maxSandDollar = 1;
+  maxCoral = 10;
+
   xPlankton = [];
   yPlankton = [];
+  xCoral = [];
+  yCoral = [];
+  dyCoral = [];
+  wCoral = [];
+  hCoral = [];
   xSandDollar = [];
   ySandDollar = [];
   jellyFishX = windowWidth/2;
-  jellyFishY = windowHeight/2 - 100;
+  jellyFishY = windowHeight/5;
+
   planktonCount = 0;
   sandDollarCount = 0;
-  health = 10000;
+
+  health = 1000;
   isMousePressed = false;
+  wave = 0;
 
   for(var i = 0; i < maxPlankton; i++){
     xPlankton.push(random(100, windowWidth-100));
@@ -148,18 +178,36 @@ function setup() {
     ySandDollar.push(windowHeight/2);
   }
 
+  for (var i = 0; i < maxCoral; i++) {
+    var w = (random() * windowWidth/2) + 50;
+
+    if (random() < 0.5) {
+      xCoral.push(0);
+    } else {
+      xCoral.push(windowWidth-w);
+    }
+
+    yCoral.push(windowHeight * random());
+    dyCoral.push(random()*4 + 1);
+    wCoral.push(w);
+    hCoral.push(50);
+  }
+
   textSize(28);
 }
 
 function mouseDragged() {
   jellyFishX = mouseX;
-  jellyFishY = mouseY;
 }
 
 function draw() {
   /************** Draw *****************/
   background(138, 163, 189);
   
+  for (var i = 0; i < maxCoral; i++) {
+    coralBar(xCoral[i], yCoral[i], wCoral[i], hCoral[i]);
+  }
+
   for (var i = 0; i < maxPlankton; i++) {
     plankton(xPlankton[i], yPlankton[i], 90 + yPlankton[i] * 1.2);
   }
@@ -189,6 +237,23 @@ function draw() {
     }
   }
 
+  for (var i = 0; i < maxCoral; i++) {
+    if (yCoral[i] <= -5) {
+      var w = (random() * windowWidth/2) + 50;
+
+      if (random() < 0.5) {
+        xCoral[i] = 0;
+      } else {
+        xCoral[i] = windowWidth-w;
+      }
+
+      yCoral[i] = windowHeight - 100;
+      wCoral[i] = w;
+      hCoral[i] = 50;
+    }
+    yCoral[i] -= 5;
+  }
+
   wave++;
   /************** /Translation ****************/
 
@@ -197,16 +262,22 @@ function draw() {
     if (abs(xPlankton[i] - jellyFishX) < 10 && abs(yPlankton[i] - jellyFishY) < 10) {
       yPlankton[i] = windowHeight - 100;
       xPlankton[i] = random(50, 350);
-      if (health + 500 > 10000) {
-        health = 10000;
+      if (health + 50 > 1000) {
+        health = 1000;
       } else {
-        health += 500;
+        health += 50;
       }
       planktonCount++;
     }
     if (abs(xSandDollar[i] - jellyFishX) < 10 && abs(xSandDollar[i] - jellyFishY) < 10) {
       maxSandDollar = 0;
       sandDollarCount++;
+    }
+  }
+
+  for (var i = 0; i < maxCoral; i++) {
+    if (abs(xCoral[i] - jellyFishX) < wCoral[i] && abs(yCoral[i] - jellyFishY) < hCoral[i]) {
+      health -= 50;
     }
   }
   /************** /Collision *****************/
