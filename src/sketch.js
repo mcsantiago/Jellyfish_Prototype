@@ -187,7 +187,7 @@ function setup() {
       xCoral.push(windowWidth-w);
     }
 
-    yCoral.push(windowHeight * random());
+    yCoral.push(windowHeight - i * 100);
     dyCoral.push(random()*4 + 1);
     wCoral.push(w);
     hCoral.push(50);
